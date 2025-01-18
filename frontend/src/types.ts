@@ -14,3 +14,7 @@ export interface CardProps {
   color?: string;
   route?: string;
 }
+
+export interface ButtonCreateOrderProps {
+  route: string;
+}
