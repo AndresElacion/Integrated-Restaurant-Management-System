@@ -5,11 +5,12 @@ export interface RegistrationFormData {
     password_confirmation: string;
 }
 export interface DashboardUser {
-  email: string;
+  name: string;
 }
 
 export interface CardProps {
   title: string;
   count: number;
   color?: string;
+  route?: string;
 }
