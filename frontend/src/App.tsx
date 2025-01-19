@@ -16,6 +16,8 @@ const PrivateRoute: React.FC<{ element: JSX.Element }> = ({ element }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        await apiURL.get('/sanctum/csrf-cookie');
+
         await apiURL.get('/api/user');
         setIsAuthenticated(true);
       } catch {
