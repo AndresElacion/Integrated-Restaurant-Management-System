@@ -6,8 +6,9 @@ import Registration from './components/Registration';
 import './App.css'
 import apiURL from './axios';
 import { AuthProvider } from './context/AuthContext';
-import Loading from './components/loading';
+import Loading from './components/Loading';
 import CreateOrder from './components/Order/CreateOrder';
+import Pos from './Pages/Pos';
 
 const PrivateRoute: React.FC<{ element: JSX.Element }> = ({ element }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,6 +48,7 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/create/order" element={<CreateOrder />} />
+          <Route path="/pos" element={<Pos />} />
         </Routes>
       </Router>
     </AuthProvider>
