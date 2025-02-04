@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Tab, TabGroup, TabList, TabPanels } from '@headlessui/react';
 import Navbar from '../components/Navbar';
-import { Category, MenuItem } from '../types';
+import { Category, MenuItem, OrderItem } from '../types';
 import apiURL from '../axios';
 import { format } from 'date-fns';
 
@@ -10,13 +10,23 @@ export default function POS() {
     const setSelectedCategory = useState(0)[1];
     const [categories, setCategories] = useState<Category[]>([])
     const [items, setItems] = useState<MenuItem[]>([]);
+    const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
 
-    // Need to double check if this is needed, probably not
-    const [orderItems, setOrderItems] = useState([
-        { name: 'Menu Item 1', price: 12.99, quantity: 1 },
-        { name: 'Menu Item 2', price: 15.99, quantity: 1 },
-        { name: 'Menu Item 3', price: 9.99, quantity: 1 },
-    ]);
+    const addToOrder = (item: MenuItem) => {
+        setOrderItems(prevItems => {
+            const existingItem = prevItems.find(orderItem => orderItem.id === item.id);
+
+            if (existingItem) {
+                return prevItems.map(orderItem => 
+                    orderItem.id === item.id
+                    ? { ...orderItem, quantity: orderItem.quantity + 1 }
+                    : orderItem
+                )
+            }
+
+            return [...prevItems, { ...item, quantity: 1 }];
+        })
+    }
 
     useEffect(() => {
         const categories = async () => {
@@ -42,33 +52,49 @@ export default function POS() {
         itemFetch();
     }, []);
 
-    function updateQuantity(index: number, amount: number): void {
+    const updateQuantity = (itemId: number, amount: number) => {
         setOrderItems((prevItems) => {
-            const newItems = [...prevItems];
-            newItems[index].quantity += amount;
-            if (newItems[index].quantity < 1) {
-                newItems[index].quantity = 1;
-            }
-            return newItems;
+            return prevItems.map(item => {
+                if (item.id === itemId) {
+                    const newQuantity = item.quantity + amount;
+                    return newQuantity < 1 ? item : { ...item, quantity: newQuantity };
+                }
+                return item;
+           })
         });
     }
 
-    function removeItem(index: number): void {
-        setOrderItems((prevItems) => prevItems.filter((_, i) => i !== index));
+    const removeItem = (itemId: number) => {
+        setOrderItems(prevItems => prevItems.filter(item => item.id !== itemId))
+    }
+
+    const calculateTotals = () => {
+        const subtotal = orderItems.reduce((total, item) => {
+            return total + (item.price * item.quantity);
+        }, 0)
+
+        const tax = subtotal * 0.05 // 5% tax change it to correct
+        const total = subtotal + tax
+
+        return { subtotal, tax, total }
+    }
+
+    const formatCategoryName = (name: string) => {
+        return name.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     }
 
   return (
         <div className="min-h-screen bg-gray-50">
         <Navbar />
         {/* Main Layout */}
-        <div className="flex h-screen">
+        <div className="flex">
             {/* Left Side - Menu */}
             <div className="w-2/3 p-6 overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Restaurant POS</h1>
-                          <p className="text-sm text-gray-500">{format(new Date(), 'EEEEEEEEE, d MMM yyy')}</p>
+                          <p className="text-sm text-gray-500">{format(new Date(), 'EEEEEEEEE, MMM dd, yyy')}</p>
                     </div>
                     <div className="flex items-center space-x-4">
                         <div className="relative">
@@ -98,13 +124,13 @@ export default function POS() {
                                     }`
                                 }
                                 >
-                                {category.name}
+                                {formatCategoryName(category.name)}
                             </Tab>
                         ))}
                     </TabList>
 
                     {/* Menu Grid */}
-                    <TabPanels className="h-[calc(100vh-220px)] overflow-y-auto">
+                    <TabPanels className="h-[calc(100vh-250px)] overflow-y-auto">
                         <div className="grid grid-cols-3 gap-4">
                             {items.map((item, i) => (
                             <motion.div
@@ -112,20 +138,16 @@ export default function POS() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.05 }}
+                                onClick={() => addToOrder(item)}    
                                 className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer"
                             >
                                 
                                 <div className='flex justify-between items-center'>
                                     <h3 className="font-medium text-gray-900">{item.name}</h3>
-                                    <p className={`px-2 py-1 text-sm font-medium rounded-full uppercase ${item.status === 'active' ? 'bg-green-100' : 'bg-red-100'}`}>{item.status}</p>    
+                                    <span className="font-bold text-blue-600">₱ {item.price}</span>
                                 </div>
                                 <div className="mt-2 flex items-center justify-between">
-                                        <span className="font-bold text-blue-600">₱ {item.price}</span>
-                                    <button className="p-1 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                        </svg>
-                                    </button>
+                                    <p className={`px-2 py-1 text-sm font-medium rounded-full uppercase ${item.status === 'active' ? 'bg-green-100' : 'bg-red-100'}`}>{item.status}</p>
                                 </div>
                             </motion.div>
                             ))}
@@ -163,7 +185,7 @@ export default function POS() {
                                         <p className="text-sm text-gray-500">${item.price.toFixed(2)}</p>
                                     </div>
                                     <button 
-                                        onClick={() => removeItem(index)}
+                                        onClick={() => removeItem(item.id)}
                                         className="text-gray-400 hover:text-red-500 transition-colors"
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +197,7 @@ export default function POS() {
                                 <div className="mt-3 flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
                                         <button 
-                                            onClick={() => updateQuantity(index, -1)}
+                                            onClick={() => updateQuantity(item.id, -1)}
                                             className="p-1 rounded-full hover:bg-gray-100 text-gray-600"
                                             >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +206,7 @@ export default function POS() {
                                         </button>
                                         <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
                                         <button 
-                                            onClick={() => updateQuantity(index, 1)}
+                                            onClick={() => updateQuantity(item.id, 1)}
                                             className="p-1 rounded-full hover:bg-gray-100 text-gray-600"
                                             >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,7 +215,7 @@ export default function POS() {
                                         </button>
                                     </div>
                                     <span className="font-medium text-gray-900">
-                                        ${(item.price * item.quantity).toFixed(2)}
+                                        ₱{(item.price * item.quantity).toFixed(2)}
                                     </span>
                                 </div>
                             </motion.div>
@@ -206,15 +228,15 @@ export default function POS() {
                         <div className="space-y-2">
                             <div className="flex justify-between text-gray-600">
                                 <span>Subtotal</span>
-                                <span>$45.97</span>
+                                <span>₱ {calculateTotals().subtotal.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-gray-600">
                                 <span>Tax</span>
-                                <span>$4.60</span>
+                                <span>₱ {calculateTotals().tax.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-lg font-bold">
                                 <span>Total</span>
-                                <span>$50.57</span>
+                                <span>₱ {calculateTotals().total.toFixed(2)}</span>
                             </div>
                         </div>
 

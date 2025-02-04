@@ -33,6 +33,10 @@ export interface MenuItem {
   status: 'active' | 'inactive';
 }
 
+export interface OrderItem extends MenuItem {
+  quantity: number;
+}
+
 export interface FormData {
   name: string;
   category: string;
