@@ -1,17 +1,46 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Tab, TabGroup, TabList, TabPanels } from '@headlessui/react';
 import Navbar from '../components/Navbar';
+import { Category, MenuItem } from '../types';
+import apiURL from '../axios';
+import { format } from 'date-fns';
 
 export default function POS() {
-  const setSelectedCategory = useState(0)[1];
-  const categories = ['All', 'Hot Dishes', 'Cold Dishes', 'Soup', 'Grill', 'Dessert'];
+    const setSelectedCategory = useState(0)[1];
+    const [categories, setCategories] = useState<Category[]>([])
+    const [items, setItems] = useState<MenuItem[]>([]);
 
+    // Need to double check if this is needed, probably not
     const [orderItems, setOrderItems] = useState([
         { name: 'Menu Item 1', price: 12.99, quantity: 1 },
         { name: 'Menu Item 2', price: 15.99, quantity: 1 },
         { name: 'Menu Item 3', price: 9.99, quantity: 1 },
     ]);
+
+    useEffect(() => {
+        const categories = async () => {
+            try {
+                const response = await apiURL.get('/api/categories');
+                setCategories(response.data);
+            } catch (error) {
+                console.log('Failed to fetch categories:', error);
+            }
+        }
+        categories();
+    }, [])
+
+    useEffect(() => {
+        const itemFetch = async () => {
+            try {
+                const response = await apiURL.get<MenuItem[]>('/api/items');
+                setItems(response.data);
+            } catch (error) {
+                console.log('Failed to fetch items:', error);
+            }
+        }
+        itemFetch();
+    }, []);
 
     function updateQuantity(index: number, amount: number): void {
         setOrderItems((prevItems) => {
@@ -39,7 +68,7 @@ export default function POS() {
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Restaurant POS</h1>
-                        <p className="text-sm text-gray-500">Tuesday, 14 March 2024</p>
+                          <p className="text-sm text-gray-500">{format(new Date(), 'EEEEEEEEE, d MMM yyy')}</p>
                     </div>
                     <div className="flex items-center space-x-4">
                         <div className="relative">
@@ -60,7 +89,7 @@ export default function POS() {
                     <TabList className="flex space-x-2 mb-6">
                         {categories.map((category) => (
                             <Tab
-                                key={category}
+                                key={category.id}
                                 className={({ selected }) =>
                                     `px-4 py-2 text-sm font-medium rounded-lg transition-all
                                     ${selected 
@@ -69,7 +98,7 @@ export default function POS() {
                                     }`
                                 }
                                 >
-                                {category}
+                                {category.name}
                             </Tab>
                         ))}
                     </TabList>
@@ -77,19 +106,21 @@ export default function POS() {
                     {/* Menu Grid */}
                     <TabPanels className="h-[calc(100vh-220px)] overflow-y-auto">
                         <div className="grid grid-cols-3 gap-4">
-                            {[...Array(9)].map((_, i) => (
+                            {items.map((item, i) => (
                             <motion.div
-                                key={i}
+                                key={item.id}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.05 }}
                                 className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer"
                             >
                                 
-                                <h3 className="font-medium text-gray-900">Menu Item {i + 1}</h3>
-                                <p className="text-sm text-gray-500">Description</p>
+                                <div className='flex justify-between items-center'>
+                                    <h3 className="font-medium text-gray-900">{item.name}</h3>
+                                    <p className={`px-2 py-1 text-sm font-medium rounded-full uppercase ${item.status === 'active' ? 'bg-green-100' : 'bg-red-100'}`}>{item.status}</p>    
+                                </div>
                                 <div className="mt-2 flex items-center justify-between">
-                                    <span className="font-bold text-blue-600">$12.99</span>
+                                        <span className="font-bold text-blue-600">₱ {item.price}</span>
                                     <button className="p-1 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100">
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
