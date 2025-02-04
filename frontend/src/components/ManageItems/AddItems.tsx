@@ -1,23 +1,65 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FormData } from '../../types';
+import { Category, FormData } from '../../types';
 import Navbar from '../Navbar';
+import apiURL from '../../axios';
+import Loading from '../Loading';
 
-export default function AddItemForm() {
+export default function AddItems() {
     const [formData, setFormData] = useState<FormData>({
         name: '',
         category: '',
         price: '',
-        description: '',
-        status: true,
+        status: 'active',
     });
     const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    useEffect(() => {
+        const categories = async () => {
+            try {
+                const response = await apiURL.get('/api/categories');
+                setCategories(response.data);
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+            };
+
+        };
+            categories();
+    }, []);
+
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            category: '',
+            price: '',
+            status: 'active',
+        });
+        setTimeout(() => {
+            setSuccess(false);
+        }, 3000)
+    }
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        // API call logic here
-        setLoading(false);
+        try {
+            const response = await apiURL.post('/api/items', formData);
+            console.log(response.data);
+            setSuccess(true);
+            resetForm();
+        } catch (error) {
+            console.error('Failed to fetch categories:', error);
+        } finally {
+            setLoading(false);
+        };
+
+        if (loading) {
+            return <div>
+                <Loading />
+            </div>;
+        }
     };
 
   return (
@@ -31,6 +73,11 @@ export default function AddItemForm() {
                 >
                 <div className="p-6 border-b border-gray-200">
                     <h2 className="text-xl font-semibold text-gray-900">Add New Menu Item</h2>
+                    {success && (
+                        <div className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                            <span className="font-medium">Success!</span> Item created successfully.
+                        </div>
+                    )}
                 </div>
 
                     <form onSubmit={handleSubmit} className="p-6">
@@ -63,11 +110,11 @@ export default function AddItemForm() {
                                         required
                                     >
                                         <option value="">Select Category</option>
-                                        <option value="hot-dishes">Hot Dishes</option>
-                                        <option value="cold-dishes">Cold Dishes</option>
-                                        <option value="soup">Soup</option>
-                                        <option value="grill">Grill</option>
-                                        <option value="dessert">Dessert</option>
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.id}>
+                                                {category.name}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 
@@ -91,36 +138,19 @@ export default function AddItemForm() {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Description
+                                <div className="flex flex-col space-y-2">
+                                    <label className="text-sm font-medium text-gray-700">
+                                        Status
                                     </label>
-                                    <textarea
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        rows={4}
+                                    <select
+                                        value={formData.status}
+                                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                                         className="mt-1 block w-full border border-gray-300 rounded-lg px-4 py-2
                                         focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-
-                                <div className="flex items-center">
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                        type="checkbox"
-                                        checked={formData.status}
-                                        onChange={(e) => setFormData({ ...formData, status: e.target.checked })}
-                                        className="sr-only peer"
-                                        />
-                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4
-                                        peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full
-                                        peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px]
-                                        after:left-[2px] after:bg-white after:border-gray-300 after:border
-                                        after:rounded-full after:h-5 after:w-5 after:transition-all
-                                        peer-checked:bg-blue-600"
-                                        />
-                                        <span className="ml-3 text-sm font-medium text-gray-700">Active Status</span>
-                                    </label>
+                                    >
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
