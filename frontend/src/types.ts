@@ -37,6 +37,10 @@ export interface FormData {
   name: string;
   category: string;
   price: string;
-  description: string;
-  status: boolean;
+  status: string;
+}
+
+export interface Category {
+  id: number;
+  name: string;
 }
