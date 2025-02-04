@@ -25,11 +25,18 @@ export interface ItemsProps {
   price: number;
 }
 
-export type MenuItem = {
-  id: number;
+export interface MenuItem {
+  id: string;
   name: string;
-  description: string;
-  price: number;
-  image: string;
   category: string;
+  price: number;
+  status: 'active' | 'inactive';
+}
+
+export interface FormData {
+  name: string;
+  category: string;
+  price: string;
+  description: string;
+  status: boolean;
 }
