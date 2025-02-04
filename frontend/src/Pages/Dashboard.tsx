@@ -36,7 +36,7 @@ const Dashboard: React.FC = () => {
                     </div>
                     
                     <CreateOrderBtn
-                        route="/create/order"
+                        route="/pos"
                     />
                 </div>
                 
