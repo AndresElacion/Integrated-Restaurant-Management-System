@@ -1,10 +1,51 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Navbar from '../Navbar';
+import { useEffect, useState } from 'react';
+import apiURL from '../../axios';
+import { MenuItem } from '../../types';
+import Loading from '../Loading';
 
 export default function AllItems() {
+    const [items, setItems] = useState<MenuItem[]>([]);
+    const [loading, setLoading] = useState(false);
 
-  return (
+    useEffect(() => {
+        const itemFetch = async () => {
+            try {
+                const response = await apiURL.get<MenuItem[]>('/api/items');
+                setItems(response.data);
+            } catch (error) {
+                console.error('Failed to fetch items:', error);
+            }
+        };
+        itemFetch();
+    }, []);
+
+    const handleDelete = async (id: number) => {
+        if (!window.confirm('Are you sure you want to delete this item?')) {
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            await apiURL.delete(`/api/items/${id}`);
+            setItems(items.filter(item => item.id !== id));
+        } catch (error) {
+            console.error('Failed to delete item:', error);
+        } finally {
+            setLoading(false);
+        }
+
+        if (loading) {
+            return <div>
+                <Loading />
+            </div>;
+        }
+    };
+
+    return (
         <div>
           <Navbar />
             {/* Header */}
@@ -30,71 +71,71 @@ export default function AllItems() {
                     />
                     </div>
                     <select className="px-4 py-2 border border-gray-200 rounded-lg bg-white">
-                    <option value="">All Categories</option>
-                    <option value="hot-dishes">Hot Dishes</option>
-                    <option value="cold-dishes">Cold Dishes</option>
-                    <option value="soup">Soup</option>
-                    <option value="grill">Grill</option>
-                    <option value="dessert">Dessert</option>
+                        <option value="">All Categories</option>
+                        <option value="hot-dishes">Hot Dishes</option>
+                        <option value="cold-dishes">Cold Dishes</option>
+                        <option value="soup">Soup</option>
+                        <option value="grill">Grill</option>
+                        <option value="dessert">Dessert</option>
                     </select>
                 </div>
 
                 {/* Items Table */}
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                    <thead className="bg-gray-50 border-y border-gray-200">
-                        <tr>
-                        <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Item
-                        </th>
-                        <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Category
-                        </th>
-                        <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Price
-                        </th>
-                        <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                        </th>
-                        <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                        </th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
-                        
-                        <motion.tr
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="hover:bg-gray-50"
-                        >
-                            <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                                <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900">item 1</div>
-                                </div>
-                            </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            soup
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            $12
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800"
-                            >
-                                available
-                            </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <div className="flex space-x-2">
-                                <button className="text-blue-600 hover:text-blue-800">Edit</button>
-                                <button className="text-red-600 hover:text-red-800">Delete</button>
-                            </div>
-                            </td>
-                        </motion.tr>
-                    </tbody>
+                        <thead className="bg-gray-50 border-y border-gray-200">
+                            <tr>
+                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Item
+                                </th>
+                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Category
+                                </th>
+                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Price
+                                </th>
+                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 bg-white">
+                            {items.map((item) => (
+                                <motion.tr
+                                    key={item.id}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="hover:bg-gray-50"
+                                >
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {item.name}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {item.category}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        ${item.price}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {item.status}
+                                    </td>
+                                    <td className="flex px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
+                                        <Link to={`/edit/item/${item.id}`} className="text-blue-600 hover:text-blue-900">
+                                            Edit
+                                        </Link>
+                                        <button 
+                                            onClick={() => handleDelete(item.id)} 
+                                            className="text-red-600 hover:text-red-900"
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </motion.tr>
+                            ))}
+                        </tbody>
                     </table>
                 </div>
             </div>

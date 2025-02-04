@@ -26,7 +26,7 @@ export interface ItemsProps {
 }
 
 export interface MenuItem {
-  id: string;
+  id: number;
   name: string;
   category: string;
   price: number;
