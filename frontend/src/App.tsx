@@ -9,6 +9,8 @@ import { AuthProvider } from './context/AuthContext';
 import Loading from './components/Loading';
 import CreateOrder from './components/Order/CreateOrder';
 import Pos from './Pages/Pos';
+import AddItems from './components/ManageItems/AddItems';
+import AllItems from './components/ManageItems/AllItems';
 
 const PrivateRoute: React.FC<{ element: JSX.Element }> = ({ element }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,8 +49,10 @@ const App: React.FC = () => {
           <Route path="/" element={<PrivateRoute element={<Dashboard />} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Registration />} />
-          <Route path="/create/order" element={<CreateOrder />} />
+          <Route path="/create/order" element={<CreateOrder />} /> {/* Need to double check for removal, creating order was on Pos already */}
           <Route path="/pos" element={<Pos />} />
+          <Route path="/all/items" element={<AllItems />} />
+          <Route path="/add/items" element={<AddItems />} />
         </Routes>
       </Router>
     </AuthProvider>
