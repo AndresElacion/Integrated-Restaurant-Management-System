@@ -23,6 +23,10 @@ class ItemController extends Controller
         return response()->json(['message' => 'Item created successfully']);
     }
 
+    public function show(Item $item) {
+        return response()->json($item);
+    }
+
     public function update(UpdateItemRequest $request, Item $item) {
         $formData = $request->validated();
 
