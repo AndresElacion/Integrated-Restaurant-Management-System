@@ -5,12 +5,14 @@ import Navbar from '../components/Navbar';
 import { Category, MenuItem, OrderItem } from '../types';
 import apiURL from '../axios';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 export default function POS() {
     const setSelectedCategory = useState(0)[1];
     const [categories, setCategories] = useState<Category[]>([])
     const [items, setItems] = useState<MenuItem[]>([]);
     const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+    const navigate = useNavigate();
 
     const addToOrder = (item: MenuItem) => {
         setOrderItems(prevItems => {
@@ -24,7 +26,7 @@ export default function POS() {
                 )
             }
 
-            return [...prevItems, { ...item, quantity: 1 }];
+            return [...prevItems, { ...item, quantity: 1, itemId: item.id }];
         })
     }
 
@@ -82,6 +84,49 @@ export default function POS() {
     const formatCategoryName = (name: string) => {
         return name.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     }
+
+    const handlePlaceOrder = async () => {
+        if (orderItems.length === 0) {
+            alert('Please add items to your order');
+            return;
+        }
+
+        try {
+            const { total, subtotal, tax } = calculateTotals();
+            
+            const order = {
+                items: orderItems.map(item => ({
+                    item_id: item.id,
+                    quantity: item.quantity,
+                    price: item.price,
+                    subtotal: item.price * item.quantity
+                })),
+                subtotal: subtotal,
+                tax: tax,
+                total_amount: total
+            };
+
+            const response = await apiURL.post('/api/orders', order);
+            
+            if (response.data.id) {
+                navigate(`/payment-confirmation/${response.data.id}`, {
+                    state: { 
+                        totalAmount: total,
+                        orderItems: orderItems,
+                        subtotal: subtotal,
+                        tax: tax
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Failed to place order:', error);
+            alert('Failed to place order. Please try again.');
+        }
+    };
+
+    const handleClearOrder = () => {
+        setOrderItems([]);
+    };
 
   return (
         <div className="min-h-screen bg-gray-50">
@@ -242,10 +287,17 @@ export default function POS() {
 
                         {/* Action Buttons */}
                         <div className="grid grid-cols-2 gap-4 mt-6">
-                            <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                            <button 
+                                onClick={handleClearOrder}
+                                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                            >
                                 Clear
                             </button>
-                            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <button 
+                                onClick={handlePlaceOrder}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                disabled={orderItems.length === 0}
+                            >
                                 Place Order
                             </button>
                         </div>

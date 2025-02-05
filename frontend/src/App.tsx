@@ -12,6 +12,7 @@ import Pos from './Pages/Pos';
 import AddItems from './components/ManageItems/AddItems';
 import AllItems from './components/ManageItems/AllItems';
 import EditItem from './components/ManageItems/EditItem';
+import PaymentConfirmation from './components/Order/PaymentConfirmation';
 
 const PrivateRoute: React.FC<{ element: JSX.Element }> = ({ element }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -55,6 +56,7 @@ const App: React.FC = () => {
           <Route path="/all/items" element={<AllItems />} />
           <Route path="/add/items" element={<AddItems />} />
           <Route path="/edit/item/:id" element={<EditItem />} />
+          <Route path="/payment-confirmation/:orderId" element={<PrivateRoute element={<PaymentConfirmation />} />} />
         </Routes>
       </Router>
     </AuthProvider>
