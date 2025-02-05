@@ -48,3 +48,21 @@ export interface Category {
   id: number;
   name: string;
 }
+
+export interface OrderItem {
+    id: number;
+    itemId: number;
+    quantity: number;
+    price: number;
+    name: string;
+}
+
+export interface Order {
+    id?: number;
+    items: OrderItem[];
+    totalAmount: number;
+    status: 'pending' | 'confirmed' | 'completed';
+    createdAt?: Date;
+    subtotal: number;
+    tax: number;
+}
