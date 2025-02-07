@@ -13,3 +13,4 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('items', ItemController::class);
 Route::apiResource('orders', OrderController::class);
+Route::get('/completed/order', [OrderController::class, 'CompletedOrder'])->name('completed.order');
