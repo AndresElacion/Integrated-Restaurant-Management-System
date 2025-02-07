@@ -66,3 +66,20 @@ export interface Order {
     subtotal: number;
     tax: number;
 }
+
+export interface CompletedOrderItem {
+    name: string;
+    price: string;
+    quantity: number;
+    subtotal: string;
+}
+
+export interface CompletedOrders {
+    id: number;
+    subtotal: string;
+    tax: string;
+    total_amount: string;
+    status: string;
+    created_at: string;
+    items: CompletedOrderItem[];
+}
