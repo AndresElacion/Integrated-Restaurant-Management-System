@@ -8,11 +8,20 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 export default function POS() {
-    const setSelectedCategory = useState(0)[1];
+    // const setSelectedCategory = useState(0)[1];
     const [categories, setCategories] = useState<Category[]>([])
     const [items, setItems] = useState<MenuItem[]>([]);
     const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+    const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState(0);
     const navigate = useNavigate();
+
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+        const filtered = items.filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
+        setFilteredItems(filtered);
+    }
 
     const addToOrder = (item: MenuItem) => {
         setOrderItems(prevItems => {
@@ -47,12 +56,36 @@ export default function POS() {
             try {
                 const response = await apiURL.get<MenuItem[]>('/api/items');
                 setItems(response.data);
+                setFilteredItems(response.data);
             } catch (error) {
                 console.log('Failed to fetch items:', error);
             }
         }
         itemFetch();
     }, []);
+
+    const filterItemsByCategory = (categoryId: number) => {
+        setSelectedCategory(categoryId === 0 ? 0 : categories.findIndex(cat => cat.id === categoryId) + 1);
+        let filtered = [...items];
+        
+        if (categoryId !== 0) {
+            filtered = filtered.filter(item => {
+                // Compare category IDs directly
+                return parseInt(item.category) === categoryId;
+            });
+        }
+
+        if (searchQuery) {
+            filtered = filtered.filter(item => 
+                item.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        console.log('Category ID:', categoryId);
+        console.log('Filtered Items:', filtered);
+        
+        setFilteredItems(filtered);
+    }
 
     const updateQuantity = (itemId: number, amount: number) => {
         setOrderItems((prevItems) => {
@@ -145,7 +178,9 @@ export default function POS() {
                         <div className="relative">
                             <input
                                 type="text"
-                                placeholder="Search menu..."
+                                  placeholder="Search menu..."
+                                  value={searchQuery}
+                                  onChange={(e) => handleSearch(e.target.value)}
                                 className="w-64 px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                             <svg className="w-5 h-5 text-gray-400 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,19 +191,40 @@ export default function POS() {
                 </div>
 
                 {/* Categories */}
-                <TabGroup onChange={setSelectedCategory}>
+                <TabGroup
+                    selectedIndex={selectedCategory}
+                    onChange={(index) => {
+                        if (index === 0) {
+                            filterItemsByCategory(0);
+                        } else {
+                            const categoryId = categories[index - 1]?.id;
+                            filterItemsByCategory(categoryId);
+                        }
+                    }}
+                >
                     <TabList className="flex space-x-2 mb-6">
+                          <Tab
+                        className={({ selected }) =>
+                            `px-4 py-2 text-sm font-medium rounded-lg transition-all
+                            ${selected 
+                                ? 'bg-blue-600 text-white shadow-md' 
+                                : 'text-gray-500 hover:bg-gray-100'
+                            }`
+                        }
+                    >
+                        All
+                    </Tab>
                         {categories.map((category) => (
                             <Tab
                                 key={category.id}
                                 className={({ selected }) =>
                                     `px-4 py-2 text-sm font-medium rounded-lg transition-all
                                     ${selected 
-                                    ? 'bg-blue-600 text-white shadow-md' 
-                                    : 'text-gray-500 hover:bg-gray-100'
+                                        ? 'bg-blue-600 text-white shadow-md' 
+                                        : 'text-gray-500 hover:bg-gray-100'
                                     }`
                                 }
-                                >
+                            >
                                 {formatCategoryName(category.name)}
                             </Tab>
                         ))}
@@ -177,7 +233,7 @@ export default function POS() {
                     {/* Menu Grid */}
                     <TabPanels className="h-[calc(100vh-250px)] overflow-y-auto">
                         <div className="grid grid-cols-3 gap-4">
-                            {items.map((item, i) => (
+                            {filteredItems.map((item, i) => (
                             <motion.div
                                 key={item.id}
                                 initial={{ opacity: 0, y: 20 }}
