@@ -8,7 +8,6 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 export default function POS() {
-    // const setSelectedCategory = useState(0)[1];
     const [categories, setCategories] = useState<Category[]>([])
     const [items, setItems] = useState<MenuItem[]>([]);
     const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
