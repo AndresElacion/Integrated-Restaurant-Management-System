@@ -65,6 +65,12 @@ export default function PaymentConfirmation() {
         setChange(newCashReceived - (totalAmount || 0));
     };
 
+    const handleCustomAmount = (event: React.ChangeEvent<HTMLInputElement>) => {
+            const value = parseFloat(event.target.value);
+        setCashReceived(value);
+        setChange(value - (totalAmount || 0));
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-3xl mx-auto">
@@ -85,6 +91,27 @@ export default function PaymentConfirmation() {
                             <span className="font-bold text-green-600">
                                 ₱{Math.max(0, change).toFixed(2)}
                             </span>
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Enter Custom Amount
+                        </label>
+                        <div className="relative rounded-md shadow-sm">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span className="text-gray-500 sm:text-sm">₱</span>
+                            </div>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={cashReceived || ''}
+                                onChange={handleCustomAmount}
+                                className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md 
+                                    focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="0.00"
+                            />
                         </div>
                     </div>
 
