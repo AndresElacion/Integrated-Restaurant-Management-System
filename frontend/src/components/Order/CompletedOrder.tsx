@@ -1,14 +1,11 @@
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Navbar from '../Navbar';
 import { useEffect, useState } from 'react';
 import apiURL from '../../axios';
-import Loading from '../Loading';
 import { CompletedOrders, CompletedOrderItem } from '../../types';
 
 export default function CompletedOrder() {
     const [orders, setOrders] = useState<CompletedOrders[]>([]);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const itemFetch = async () => {
@@ -22,29 +19,6 @@ export default function CompletedOrder() {
         };
         itemFetch();
     }, []);
-
-    const handleDelete = async (id: number) => {
-        if (!window.confirm('Are you sure you want to delete this item?')) {
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            await apiURL.delete(`/api/items/${id}`);
-            setOrders(orders.filter(order => order.id !== id));
-        } catch (error) {
-            console.error('Failed to delete item:', error);
-        } finally {
-            setLoading(false);
-        }
-
-        if (loading) {
-            return <div>
-                <Loading />
-            </div>;
-        }
-    };
 
     return (
         <div>
@@ -81,65 +55,42 @@ export default function CompletedOrder() {
                     </select>
                 </div>
 
-                {/* Items Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-gray-50 border-y border-gray-200">
-                            <tr>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Item
-                                </th>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Price
-                                </th>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
-                            {orders.map((order) => (
-                                <motion.tr
-                                    key={order.id}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="hover:bg-gray-50"
-                                >
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {order.items.map((item: CompletedOrderItem, index) => (
-                                            <div key={index}>
-                                                <div  className="flex items-center space-x-2">
-                                                    <span>{item.name}</span>
-                                                    <span>x {item.quantity}</span>
-                                                </div>
-                                            </div>
-                                            
-                                        ))}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        ${order.total_amount}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {order.status}
-                                    </td>
-                                    <td className="flex px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
-                                        <Link to={`/edit/item/${order.id}`} className="text-blue-600 hover:text-blue-900">
-                                            Edit
-                                        </Link>
-                                        <button 
-                                            onClick={() => handleDelete(order.id)} 
-                                            className="text-red-600 hover:text-red-900"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </motion.tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {orders.map((order) => (
+                        <div className="bg-white shadow-md rounded-lg p-4 flex flex-col justify-between border border-gray-200">
+                            <div className="mb-4" key={order.id}>
+                                <h2 className="text-xl font-bold text-gray-800">
+                                    Order # 2
+                                </h2>
+                                {order.items.map((item: CompletedOrderItem, index) => (
+                                    <div key={index}>
+                                        <p className="text-sm text-gray-600 mt-1">
+                                            {item.name} x {item.quantity}
+                                        </p>
+                                        <p className="text-sm text-gray-600 mt-1">
+                                            ₱ {(parseFloat(item.price) * item.quantity).toFixed(2)}
+                                        </p>
+                                    </div>
+                                ))}
+                                <p className="text-sm text-gray-600 mt-1">
+                                    Status: <span className="font-medium text-gray-800">Completed</span>
+                                </p>
+                            </div>
+
+                            <div className="border-t border-gray-200 pt-4">
+                                <p className="text-sm text-gray-600 mt-2">
+                                    Tax: <span className="uppercase font-semibold">{order.tax}</span>
+                                </p>
+                                <p className="text-2xl font-bold text-green-600">
+                                    ₱ {order.total_amount}
+                                </p>
+                                <a href="{{ route('orders.show', $order) }}" 
+                                className="inline-block mt-4 text-sm font-medium text-blue-600 hover:text-blue-800">
+                                    View Order Details →
+                                </a>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

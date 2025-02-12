@@ -82,4 +82,5 @@ export interface CompletedOrders {
     status: string;
     created_at: string;
     items: CompletedOrderItem[];
+    payment_method: string;
 }
