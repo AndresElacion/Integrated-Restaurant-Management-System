@@ -57,8 +57,8 @@ export default function CompletedOrder() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {orders.map((order) => (
-                        <div className="bg-white shadow-md rounded-lg p-4 flex flex-col justify-between border border-gray-200">
-                            <div className="mb-4" key={order.id}>
+                        <div key={order.id} className="bg-white hover:bg-gray-50 shadow-md rounded-lg p-4 flex flex-col justify-between border border-gray-200">
+                            <div className="mb-4">
                                 <h2 className="text-xl font-bold text-gray-800">
                                     Order # 2
                                 </h2>
@@ -84,10 +84,6 @@ export default function CompletedOrder() {
                                 <p className="text-2xl font-bold text-green-600">
                                     ₱ {order.total_amount}
                                 </p>
-                                <a href="{{ route('orders.show', $order) }}" 
-                                className="inline-block mt-4 text-sm font-medium text-blue-600 hover:text-blue-800">
-                                    View Order Details →
-                                </a>
                             </div>
                         </div>
                     ))}
