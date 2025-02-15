@@ -9,6 +9,9 @@ import Loading from '../Loading';
 export default function AllItems() {
     const [items, setItems] = useState<MenuItem[]>([]);
     const [loading, setLoading] = useState(false);
+    const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
 
     useEffect(() => {
         const itemFetch = async () => {
@@ -45,6 +48,29 @@ export default function AllItems() {
         }
     };
 
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+        const filtered = items.filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
+        setFilteredItems(filtered);
+    }
+
+    const filterItemsByCategory = (categoryValue: string) => {
+        setSelectedCategory(categoryValue);
+        let filtered = [...items];
+        
+        if (categoryValue !== '') {
+            filtered = filtered.filter(item => item.category === categoryValue);
+        }
+
+        if (searchQuery) {
+            filtered = filtered.filter(item => 
+                item.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+        
+        setFilteredItems(filtered);
+    };
+
     return (
         <div>
           <Navbar />
@@ -66,11 +92,17 @@ export default function AllItems() {
                     <input
                         type="text"
                         placeholder="Search items..."
+                        value={searchQuery}
+                        onChange={(e) => handleSearch(e.target.value)}
                         className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 
                         focus:ring-blue-500 focus:border-transparent"
                     />
                     </div>
-                    <select className="px-4 py-2 border border-gray-200 rounded-lg bg-white">
+                    <select 
+                        value={selectedCategory}
+                        className="px-4 py-2 border border-gray-200 rounded-lg bg-white"
+                        onChange={(e) => filterItemsByCategory(e.target.value)}
+                    >
                         <option value="">All Categories</option>
                         <option value="hot-dishes">Hot Dishes</option>
                         <option value="cold-dishes">Cold Dishes</option>
@@ -103,7 +135,7 @@ export default function AllItems() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
-                            {items.map((item) => (
+                            {(searchQuery ? filteredItems : items).map((item) => (
                                 <motion.tr
                                     key={item.id}
                                     initial={{ opacity: 0 }}
