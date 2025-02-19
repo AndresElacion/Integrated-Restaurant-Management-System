@@ -15,4 +15,7 @@ Route::apiResource('categories', CategoryController::class);
 Route::apiResource('items', ItemController::class);
 Route::apiResource('orders', OrderController::class);
 Route::apiResource('users', UserController::class);
-Route::get('/completed/order', [OrderController::class, 'CompletedOrder'])->name('completed.order');
+
+Route::middleware(['auth:sanctum', 'role:admin,chef'])->group(function () {
+    Route::get('/completed/order', [OrderController::class, 'CompletedOrder'])->name('completed.order');
+});
