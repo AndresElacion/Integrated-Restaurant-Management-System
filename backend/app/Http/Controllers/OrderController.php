@@ -7,12 +7,22 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
+    protected function boot() {
+        $this->middleware('role:admin,chef')->only('CompletedOrder');
+    }
+
     public function CompletedOrder() {
+        $user = auth()->user();
+
         $orders = Order::with(['orderItems.item'])
         ->where('status', 'completed')
+        ->when($user->role === 'chef', function ($query) {
+            return $query->orderBy('created_at', 'desc');
+        })
         ->get()
         ->map(function ($order) {
             return [
@@ -32,7 +42,10 @@ class OrderController extends Controller
                 })
             ];
         });
-        return response()->json($orders);
+        return response()->json([
+            'data' => $orders,
+            'user_role' => $user->role
+        ]);
     }
 
     public function store(Request $request) {
