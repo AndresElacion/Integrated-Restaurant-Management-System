@@ -10,15 +10,24 @@ export default function CompletedOrder() {
     useEffect(() => {
         const itemFetch = async () => {
             try {
-                const response = await apiURL.get<CompletedOrders[]>('/api/completed/order');
-                setOrders(response.data);
-                console.log(response.data);
+                const response = await apiURL.get('/api/completed/order');
+                
+                console.log('API Response:', response.data); // Debugging
+                
+                if (Array.isArray(response.data.data)) { // Ensure it's an array
+                    setOrders(response.data.data);
+                } else {
+                    console.error('Unexpected API response format:', response.data);
+                    setOrders([]); // Set an empty array to prevent errors
+                }
             } catch (error) {
                 console.error('Failed to fetch items:', error);
+                setOrders([]); // Ensure orders is always an array
             }
         };
         itemFetch();
     }, []);
+
 
     return (
         <div>
