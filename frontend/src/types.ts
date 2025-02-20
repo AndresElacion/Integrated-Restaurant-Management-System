@@ -4,6 +4,13 @@ export interface RegistrationFormData {
   password: string;
   password_confirmation: string;
 }
+
+export interface FetchUserData {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
 export interface DashboardUser {
   name: string;
 }
