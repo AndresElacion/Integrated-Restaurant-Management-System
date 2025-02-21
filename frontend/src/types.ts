@@ -11,6 +11,11 @@ export interface FetchUserData {
   email: string;
   role: string;
 }
+
+export interface AddUserData extends FetchUserData {
+  password: string;
+  password_confirmation: string;
+}
 export interface DashboardUser {
   name: string;
 }
