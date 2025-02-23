@@ -127,7 +127,7 @@ export default function AddUsers() {
                                         <option value="">Select a role</option>
                                         <option value="admin">Admin</option>
                                         <option value="chef">Chef</option>
-                                        <option value="chasier">Chashier</option>
+                                        <option value="cashier">Chashier</option>
                                         <option value="waiter">Waiter</option>
                                     </select>
                                 </div>
