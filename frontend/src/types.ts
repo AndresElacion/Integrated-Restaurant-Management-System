@@ -96,3 +96,9 @@ export interface CompletedOrders {
     items: CompletedOrderItem[];
     payment_method: string;
 }
+
+export interface DashboardStats {
+    totalOrders: number;
+    totalPendings: number;
+    totalCompleted: number;
+}

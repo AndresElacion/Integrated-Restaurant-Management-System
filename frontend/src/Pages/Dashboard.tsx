@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import apiURL from '../axios';
-import { DashboardUser } from '../types';
+import { DashboardStats, DashboardUser } from '../types';
 import Cards from '../components/Cards';
 import CreateOrderBtn from '../components/CreateOrderBtn';
 // import Loading from '../components/loading';
 
 const Dashboard: React.FC = () => {
     const [user, setUser] = useState<DashboardUser | null>(null);
+    const [stats, setStats] = useState<DashboardStats>({
+        totalOrders: 0,
+        totalPendings: 0,
+        totalCompleted: 0
+    })
     // const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -20,7 +25,17 @@ const Dashboard: React.FC = () => {
             }
         };
 
+        const fetchStats = async () => {
+            try { 
+                const response = await apiURL.get('/api/dashboard/stats')
+                setStats(response.data)
+            } catch (error) {
+                console.error('Failed to fetch stats:', error)
+            }
+        }
+
         fetchUser();
+        fetchStats();
     }, []);
 
     return (
@@ -43,7 +58,7 @@ const Dashboard: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <Cards 
                         title="Total Orders"
-                        count={10}
+                        count={stats.totalOrders}
                         color="bg-blue-500"
                         route='/total/orders'
                     />
@@ -55,13 +70,13 @@ const Dashboard: React.FC = () => {
                     />
                     <Cards 
                         title="Completed Orders"
-                        count={12}
+                        count={stats.totalCompleted}
                         color="bg-green-500"
                         route="/completed/orders"
                     />
                     <Cards 
                         title="Pending Orders"
-                        count={5}
+                        count={stats.totalPendings}
                         color="bg-red-400"
                         route="/pending/orders"
                     />
