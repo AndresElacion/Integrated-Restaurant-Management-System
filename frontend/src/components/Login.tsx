@@ -13,6 +13,7 @@ const Login: React.FC = () => {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
+			await apiURL.get("/sanctum/csrf-cookie")
 			await apiURL.post('/login', { email, password }, {
 				withCredentials: true,
 			});
