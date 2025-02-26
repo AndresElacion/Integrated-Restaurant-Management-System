@@ -25,6 +25,7 @@ const PrivateRoute: React.FC<{ element: JSX.Element }> = ({ element }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      setLoading(true);
       try {
         await apiURL.get('/sanctum/csrf-cookie');
 
@@ -40,9 +41,7 @@ const PrivateRoute: React.FC<{ element: JSX.Element }> = ({ element }) => {
   }, []);
 
     if (loading) {
-        return <div>
-            <Loading />
-        </div>;
+        return <Loading />
     }
 
   return isAuthenticated ? element : <Navigate to="/login" />;
