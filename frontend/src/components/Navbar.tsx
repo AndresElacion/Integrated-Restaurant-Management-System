@@ -30,7 +30,7 @@ const Navbar: React.FC = () => {
               <Link to="/pos" className="text-white hover:text-gray-300">POS</Link>
               <Link to="/all/items" className="text-white hover:text-gray-300">Manage Items</Link>
               <Link to="/all/users" className="text-white hover:text-gray-300">Manage Users</Link>
-              <Link to="#" className="text-white hover:text-gray-300">Kitchen</Link>
+              <Link to="/kitchen/order" className="text-white hover:text-gray-300">Kitchen</Link>
               <Link to="/completed/order" className="text-white hover:text-gray-300">Order</Link>
               <button onClick={signOut} className="text-white hover:text-gray-300">Logout</button>
             </>

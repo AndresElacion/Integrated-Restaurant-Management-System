@@ -17,6 +17,7 @@ import CompletedOrder from './components/Order/CompletedOrder';
 import AllUsers from './components/Users/AllUsers';
 import AddUsers from './components/Users/AddUsers';
 import EditUsers from './components/Users/EditUsers';
+import KitchenOrder from './components/Kitchen/KitchenOrder';
 
 const PrivateRoute: React.FC<{ element: JSX.Element }> = ({ element }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -62,6 +63,7 @@ const App: React.FC = () => {
           <Route path="/edit/item/:id" element={<EditItem />} />
           <Route path="/payment-confirmation/:orderId" element={<PrivateRoute element={<PaymentConfirmation />} />} />
           <Route path="/completed/order" element={<CompletedOrder />} />
+          <Route path="/kitchen/order" element={<KitchenOrder />} />
           <Route path="/all/users" element={<AllUsers />} />
           <Route path="/add/users" element={<AddUsers />} />
           <Route path="/edit/user/:id" element={<EditUsers />} />
