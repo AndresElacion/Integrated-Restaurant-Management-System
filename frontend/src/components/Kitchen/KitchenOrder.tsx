@@ -10,7 +10,7 @@ export default function KitchenOrder() {
     useEffect(() => {
         const itemFetch = async () => {
             try {
-                const response = await apiURL.get('/api/completed/order');
+                const response = await apiURL.get('/api/kitchen/orders');
                 
                 console.log('API Response:', response.data); // Debugging
                 
