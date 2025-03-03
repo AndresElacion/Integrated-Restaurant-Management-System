@@ -114,7 +114,7 @@ class OrderController extends Controller
     public function update(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|in:pending,completed',
+            'status' => 'required|in:pending,completed,preparing',
             'paymentMethod' => 'required|in:cash'
         ]);
 
