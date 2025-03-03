@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->decimal('total_amount', 10, 2);
-            $table->enum('status', ['pending', 'completed'])->default('pending');
+            $table->enum('status', ['pending', 'completed', 'preparing'])->default('preparing');
             $table->string('payment_method')->nullable();
             $table->timestamps();
         });
