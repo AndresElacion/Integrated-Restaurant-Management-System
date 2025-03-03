@@ -23,6 +23,7 @@ Route::middleware(['auth:sanctum', 'role:admin,chef'])->group(function () {
     Route::get('/completed/order', [OrderController::class, 'CompletedOrder'])->name('completed.order');
 });
 
-Route::middleware(['auth:sanctum', 'role:kitchen'])->group(function () {
-    Route::get('/kitchen/order', [KitchenController::class, 'CompletedOrder'])->name('kitchen.order');
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/kitchen/orders', [KitchenController::class, 'CompletedOrder']);
+    Route::patch('/kitchen/orders/{order}/status', [KitchenController::class, 'updateOrderStatus']);
 });
